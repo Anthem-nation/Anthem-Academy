@@ -124,6 +124,9 @@ pnpm db:reset        # Reset local DB
 
 ## Team
 
-| Role | GitHub |
+| Role | Name |
 |---|---|
 | Platform Lead | @nishanth1104 |
+| Database | Abheesh |
+| UI/UX | Abhinav |
+| AI/ML | Devika |
