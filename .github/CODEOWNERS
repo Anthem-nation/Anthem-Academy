@@ -1,4 +1,4 @@
-# nishanth1104 must review any change to production-critical paths
+# nishanth1104 must review any change to these production-critical paths
 *                          @nishanth1104
 supabase/migrations/       @nishanth1104
 .github/workflows/         @nishanth1104

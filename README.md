@@ -79,15 +79,18 @@ pnpm dev
 ## Branch Strategy
 
 ```
-feature/* ──► main (staging auto-deploy)
-                └──► production (prod deploy — nishanth1104 only)
+feature/* ──► PR (Vercel preview URL auto-generated)
+                └──► main (CI must pass + 1 review → auto-deploys to production)
 ```
 
-| Branch | Environment | Who can merge |
+| Branch | Environment | Rules |
 |---|---|---|
-| `main` | Staging | Any team member (CI must pass + 1 approval) |
-| `production` | Production | nishanth1104 only (CODEOWNERS + CI must pass) |
-| `feature/*` | Local | PRs target `main` |
+| `main` | **Production** | PRs only — CI must pass + 1 approval required |
+| `feature/*` | Local + Vercel Preview | All development work, PRs target `main` |
+
+**Every PR automatically gets a Vercel preview URL** — use that to test your changes before merging.
+
+`@nishanth1104` is the only person who can force-merge (bypass review requirements) when needed.
 
 ## Environment Variables
 
@@ -95,15 +98,13 @@ See [`.env.example`](.env.example) for the full list of required variables.
 
 ### GitHub Secrets Required for CI/CD
 
-| Secret | Description |
+| Secret | Where to find it |
 |---|---|
-| `SUPABASE_ACCESS_TOKEN` | Supabase account access token |
-| `SUPABASE_STAGING_PROJECT_ID` | Staging Supabase project ref |
-| `SUPABASE_PRODUCTION_PROJECT_ID` | Production Supabase project ref |
-| `VERCEL_TOKEN` | Vercel API token |
-| `VERCEL_ORG_ID` | Vercel organization ID |
-| `VERCEL_STAGING_PROJECT_ID` | Vercel staging project ID |
-| `VERCEL_PRODUCTION_PROJECT_ID` | Vercel production project ID |
+| `SUPABASE_ACCESS_TOKEN` | supabase.com → Account → Access Tokens |
+| `SUPABASE_PROJECT_ID` | Supabase project → Settings → General |
+| `VERCEL_TOKEN` | vercel.com → Settings → Tokens |
+| `VERCEL_ORG_ID` | Vercel project settings |
+| `VERCEL_PROJECT_ID` | Vercel project settings |
 
 ## Scripts
 
