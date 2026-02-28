@@ -126,7 +126,7 @@ pnpm db:reset        # Reset local DB
 
 | Role | Name |
 |---|---|
-| Platform Lead | @nishanth1104 |
-| Database | Abheesh |
-| UI/UX | Abhinav |
-| AI/ML | Devika |
+| AI Product Manager | Nishanth Ayyalasomayajula |
+| Database Owner | Sai Abheesh Annaiah |
+| UI/UX Designer | Abhinav Varma Vathadi |
+| AI/ML Engineer | Devika Rani Sanaboyina |
