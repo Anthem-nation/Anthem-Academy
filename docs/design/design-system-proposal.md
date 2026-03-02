@@ -1,126 +1,160 @@
 # Anthem Academy — Design System Proposal
 
-> **Status: DRAFT — Pending CTO review and website reference**
+> **Status: UPDATED — Brand colors extracted from theanthemacademy.org**
 >
-> This document proposes the visual design language for Anthem Academy. It is based on
-> the PRD (v2.0, Feb 2026) and will be updated once the CTO shares the existing Anthem
-> Academy website URL for brand reference. No code has been changed yet.
+> Original proposal used Indigo + Amber (generic). This revision uses the
+> actual brand palette extracted from the live Anthem Academy website CSS.
+> No code has been changed yet — pending team review before applying.
 
 ---
 
 ## 1. Design Direction
 
 ### Platform Identity
-Anthem Academy serves youth-focused programs across schools, community organizations, and
-workforce development partners. The design must balance:
+Anthem Academy serves youth-focused programs across schools, community organizations,
+and workforce development partners. The actual brand communicates:
 
-| Audience | Tone needed |
-|---|---|
-| Students / Interns | Energetic, motivating, achievement-oriented |
-| Instructors / Site Ops | Clear, efficient, data-readable |
-| Partner Admins / Staff | Trustworthy, professional, compliance-ready |
+- **Warm and human** — Terracotta as the action color (not a cold corporate blue)
+- **Authoritative and deep** — Navy as the structural/background color
+- **Energetic and celebratory** — Gold for achievements, highlights, credentials
+- **American spirit** — Red, Blue, Yellow in the logo palette fits "Anthem" perfectly
 
-**Core personality: Aspirational, Structured, Human.**
-Not a cold enterprise tool. Not a childish education app. Something in between —
-bold enough to inspire youth, trustworthy enough for institutions.
+**Core personality: Warm, Grounded, Aspirational.**
 
 ---
 
-## 2. Color Palette
+## 2. Color Palette — Extracted from theanthemacademy.org
 
-### Primary Palette: Indigo + Amber
+### Primary Brand Colors (from CSS variables)
 
-| Role | Name | Hex | HSL | Rationale |
+| Role | Name | Hex | RGB | Source var |
 |---|---|---|---|---|
-| Primary | Indigo | `#4F46E5` | `243 75% 58%` | Trust, intelligence, depth — ideal for education |
-| Primary (dark mode) | Indigo Light | `#6366F1` | `245 80% 67%` | Lighter for dark backgrounds |
-| Accent | Amber | `#F59E0B` | `38 92% 50%` | Achievement, energy — badges, credentials, highlights |
+| **Primary / CTA** | Terracotta | `#D0744B` | `208, 116, 75` | `--color_18` (action, buttons) |
+| **Dark surface** | Deep Navy | `#15465F` | `21, 70, 95` | `--color_21` |
+| **Darkest bg** | Midnight Navy | `#111C30` | `17, 28, 48` | `--color_25` |
+| **Accent / Achievement** | Gold | `#F9AC02` | `249, 172, 2` | `--color_19` |
+| **Background** | Warm Off-White | `#F3F1F2` | `243, 241, 242` | `--color_11` |
+| **Text primary** | Black | `#000000` | `0, 0, 0` | `--color_15` |
+| **Text secondary** | Dark Brown-Black | `#26140A` | `38, 20, 10` | `--color_14` |
+| **Body text** | Charcoal | `#4F4F4F` | `79, 79, 79` | `--color_47` |
 
-**Why Indigo + Amber?**
-- Indigo communicates depth and ambition without feeling corporate
-- Amber is the natural color of achievement (gold medals, trophies) — maps perfectly to
-  the platform's credentialing and Skill Passport features
-- High contrast pair that works well in both light and dark mode
-- Both colors pass WCAG AA contrast requirements against white/dark backgrounds
+### Logo / Brand Identity Colors
+
+| Name | Hex | RGB | Source var |
+|---|---|---|---|
+| Brand Red | `#ED1C24` | `237, 28, 36` | `--color_3` |
+| Brand Blue | `#0088CB` | `0, 136, 203` | `--color_4` |
+| Brand Yellow | `#FFCB05` | `255, 203, 5` | `--color_5` |
+
+> These appear in the logo only — not used for UI components directly.
 
 ### Semantic / Status Colors
 
-| Role | Hex | HSL | Used for |
-|---|---|---|---|
-| Success | `#10B981` | `160 84% 39%` | Present, completed, passed, approved |
-| Warning | `#F59E0B` | `38 92% 50%` | Late, pending, expiring, needs review |
-| Error | `#EF4444` | `0 84% 60%` | Absent, failed, overdue, blocked |
-| Info | `#3B82F6` | `217 91% 60%` | Neutral info, tooltips, guidance |
-
-### Neutral Scale (Warm Gray — slight indigo undertone)
-
-| Token | Light mode | Dark mode |
+| Role | Hex | Use |
 |---|---|---|
-| Background | `hsl(0 0% 100%)` | `hsl(224 71% 4%)` |
-| Card surface | `hsl(0 0% 100%)` | `hsl(224 50% 8%)` |
-| Muted bg | `hsl(240 5% 96%)` | `hsl(240 4% 14%)` |
-| Muted text | `hsl(240 4% 46%)` | `hsl(240 5% 55%)` |
-| Border | `hsl(240 6% 90%)` | `hsl(240 6% 16%)` |
+| Success | `#10B981` | Present, completed, passed, approved |
+| Warning | `#F9AC02` | Late, pending, expiring (reuses brand Gold) |
+| Error | `#ED1C24` | Absent, failed, overdue (reuses brand Red) |
+| Info | `#0088CB` | Neutral info, tooltips (reuses brand Blue) |
+
+> Semantic colors deliberately reuse brand colors — consistency with zero extra tokens.
 
 ---
 
-## 3. Light & Dark Mode
+## 3. Light & Dark Mode CSS Variables
 
-Both modes are fully defined using CSS custom properties (shadcn/ui variable system).
-Switching between modes is handled by adding/removing the `.dark` class on `<html>`.
-
-### Proposed CSS Variables
+### Proposed `globals.css`
 
 ```css
-/* Light Mode */
-:root {
-  --background: 0 0% 100%;
-  --foreground: 224 71% 4%;
-  --card: 0 0% 100%;
-  --card-foreground: 224 71% 4%;
-  --border: 240 6% 90%;
-  --input: 240 6% 90%;
-  --ring: 243 75% 58%;
-  --primary: 243 75% 58%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 243 30% 96%;
-  --secondary-foreground: 243 75% 30%;
-  --muted: 240 5% 96%;
-  --muted-foreground: 240 4% 46%;
-  --accent: 38 92% 50%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-  --success: 160 84% 39%;
-  --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
-  --radius: 0.5rem;
-}
+@layer base {
+  :root {
+    /* Backgrounds */
+    --background: 30 8% 96%;          /* #F3F1F2 warm off-white */
+    --foreground: 20 50% 4%;          /* #26140A dark brown-black */
 
-/* Dark Mode */
-.dark {
-  --background: 224 71% 4%;
-  --foreground: 210 40% 98%;
-  --card: 224 50% 8%;
-  --card-foreground: 210 40% 98%;
-  --border: 240 6% 16%;
-  --input: 240 6% 16%;
-  --ring: 245 80% 67%;
-  --primary: 245 80% 67%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 243 30% 14%;
-  --secondary-foreground: 243 60% 80%;
-  --muted: 240 4% 14%;
-  --muted-foreground: 240 5% 55%;
-  --accent: 38 92% 50%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 63% 40%;
-  --destructive-foreground: 0 0% 98%;
-  --success: 160 84% 39%;
-  --success-foreground: 0 0% 100%;
-  --warning: 38 92% 50%;
-  --warning-foreground: 0 0% 100%;
+    /* Card / surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 20 50% 4%;
+
+    /* Borders & inputs */
+    --border: 0 0% 89%;               /* #E3E3E3 */
+    --input: 0 0% 89%;
+    --ring: 18 57% 55%;               /* #D0744B terracotta focus ring */
+
+    /* Primary — Terracotta */
+    --primary: 18 57% 55%;            /* #D0744B */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary — Light terracotta tint */
+    --secondary: 18 40% 94%;
+    --secondary-foreground: 18 57% 35%;
+
+    /* Muted */
+    --muted: 30 5% 94%;
+    --muted-foreground: 0 0% 31%;     /* #4F4F4F charcoal */
+
+    /* Accent — Gold */
+    --accent: 40 98% 49%;             /* #F9AC02 */
+    --accent-foreground: 20 50% 4%;   /* dark text on gold */
+
+    /* Destructive */
+    --destructive: 357 84% 52%;       /* #ED1C24 brand red */
+    --destructive-foreground: 0 0% 100%;
+
+    /* Semantic */
+    --success: 160 84% 39%;           /* #10B981 */
+    --success-foreground: 0 0% 100%;
+    --warning: 40 98% 49%;            /* #F9AC02 gold = warning */
+    --warning-foreground: 20 50% 4%;
+    --info: 201 100% 40%;             /* #0088CB brand blue */
+    --info-foreground: 0 0% 100%;
+
+    /* Border radius */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Backgrounds */
+    --background: 218 47% 13%;        /* #111C30 midnight navy */
+    --foreground: 30 8% 96%;          /* #F3F1F2 warm off-white */
+
+    /* Card / surfaces */
+    --card: 205 63% 23%;              /* #15465F deep navy */
+    --card-foreground: 30 8% 96%;
+
+    /* Borders & inputs */
+    --border: 205 63% 30%;
+    --input: 205 63% 30%;
+    --ring: 18 57% 55%;               /* #D0744B terracotta stays */
+
+    /* Primary — Terracotta stays in dark mode */
+    --primary: 18 57% 55%;            /* #D0744B */
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary */
+    --secondary: 205 63% 18%;
+    --secondary-foreground: 30 8% 90%;
+
+    /* Muted */
+    --muted: 205 50% 18%;
+    --muted-foreground: 0 0% 65%;
+
+    /* Accent — Gold stays */
+    --accent: 40 98% 49%;             /* #F9AC02 */
+    --accent-foreground: 218 47% 13%; /* navy text on gold */
+
+    /* Destructive */
+    --destructive: 357 84% 52%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Semantic */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 40 98% 49%;
+    --warning-foreground: 218 47% 13%;
+    --info: 201 100% 40%;
+    --info-foreground: 0 0% 100%;
+  }
 }
 ```
 
@@ -128,88 +162,91 @@ Switching between modes is handled by adding/removing the `.dark` class on `<htm
 
 ## 4. Typography
 
+The Anthem Academy website uses system sans-serif fonts. For the platform we use Inter
+(already installed) — clean, readable, excellent for data-dense dashboards.
+
 | Role | Font | Weight | Size |
 |---|---|---|---|
-| Headings | Inter | 700 (Bold) | 2xl – 4xl |
-| Body | Inter | 400 (Regular) | base (16px) |
-| Dashboard data | Inter | 500 (Medium) | sm (14px) |
+| Headings | Inter | 700 | 2xl – 4xl |
+| Body | Inter | 400 | base (16px) |
+| Dashboard data | Inter | 500 | sm (14px) |
 | Labels / Captions | Inter | 400 | xs (12px) |
 | Monospace (IDs, timestamps) | JetBrains Mono | 400 | sm |
-
-Inter is already loaded in the app. JetBrains Mono to be added when needed.
 
 ---
 
 ## 5. Component Style Guide
 
-### Spacing & Shape
-| Property | Value | Rationale |
-|---|---|---|
-| Border radius | `0.5rem` | Rounded but not pill — professional feel |
-| Card padding | `1.5rem` (p-6) | Comfortable dashboard density |
-| Section gap | `2rem` (gap-8) | Clear visual separation |
+### Shape & Spacing
+| Property | Value |
+|---|---|
+| Border radius | `0.5rem` — rounded, not sharp, not pill |
+| Card padding | `1.5rem` (p-6) |
+| Section gap | `2rem` (gap-8) |
 
 ### Component Patterns
 
-| Component | Style |
-|---|---|
-| Primary button | Solid indigo, white text, rounded-md |
-| Secondary button | Ghost — border only, indigo text |
-| Destructive button | Solid red, white text |
-| Cards | White bg, border + shadow-sm (no heavy shadows) |
-| Tables | Zebra striping — muted bg on alternating rows |
-| Badges (status) | Semantic color fill — `success`, `warning`, `error` |
-| Badges (achievement) | Amber fill — for credentials, skill levels |
-| Sidebar | Always dark indigo (`hsl(224 71% 4%)`) in both modes |
-| Nav active state | Indigo background, white text |
+| Component | Light mode | Dark mode |
+|---|---|---|
+| Primary button | Terracotta `#D0744B` fill, white text | Same |
+| Secondary button | Terracotta border, terracotta text | Lighter terracotta border |
+| Sidebar | Midnight Navy `#111C30` | Midnight Navy `#111C30` (same) |
+| Nav active state | Terracotta bg, white text | Terracotta bg, white text |
+| Cards | White bg, subtle border | Deep Navy `#15465F` bg |
+| Achievement badges | Gold `#F9AC02` fill, dark text | Gold `#F9AC02` fill |
+| Status: success | Emerald `#10B981` | Same |
+| Status: warning | Gold `#F9AC02` | Same |
+| Status: error | Brand Red `#ED1C24` | Same |
+| Status: info | Brand Blue `#0088CB` | Same |
+| Tables | Warm off-white `#F3F1F2` alternating rows | Navy alternating rows |
 
-### Kiosk Mode (QR Check-in)
-- High contrast only — no subtle grays
-- Large touch targets (min 48x48px)
-- Success state: full-screen green flash on check-in
-- Error state: full-screen red with clear message
+### Sidebar (always dark)
+The sidebar should always use Midnight Navy `#111C30` regardless of light/dark mode.
+Active items use Terracotta `#D0744B` as the highlight. This matches the website's tone.
 
-### Accessibility Targets
-- All text must meet **WCAG AA** (4.5:1 contrast ratio)
-- Focus rings visible on all interactive elements (indigo ring color)
-- Color is never the only indicator of status (always pair with icon or label)
-
----
-
-## 6. Portal-Specific Notes
-
-| Portal | Dominant feel |
-|---|---|
-| Student | Warm, motivating — amber accents prominent |
-| Instructor | Efficient, data-dense — indigo dominant |
-| Site Ops | High contrast, operational — minimal decoration |
-| Partner Admin | Professional, report-oriented — neutral with indigo |
-| Staff Admin | Dense, system-level — dark sidebar, compact tables |
+### Kiosk Mode (QR Check-in screen)
+- High contrast — white text on Midnight Navy background
+- Success: full-screen Emerald flash `#10B981`
+- Error: full-screen Brand Red `#ED1C24`
+- Large touch targets (min 48×48px)
 
 ---
 
-## 7. Open Questions (Pending CTO Input)
+## 6. Portal-Specific Color Emphasis
 
-- [ ] What is the existing Anthem Academy website URL? (primary brand reference)
-- [ ] Are there existing brand guidelines / logo files?
-- [ ] Is there a Figma design file already started?
-- [ ] Does the platform have an existing primary color we must match?
-- [ ] Any specific color accessibility requirements beyond WCAG AA?
-- [ ] Should the Anthem Academy logo be included in the sidebar or top nav?
+| Portal | Primary feel | Accent emphasis |
+|---|---|---|
+| Student | Warm, motivating | Gold badges prominent |
+| Instructor | Data-dense | Terracotta action items |
+| Site Ops | High contrast, operational | Minimal decoration |
+| Partner Admin | Professional | Terracotta CTAs, navy headers |
+| Staff Admin | System-level, dense | Navy dominant |
+
+---
+
+## 7. Before vs After
+
+| Token | Old proposal (Indigo + Amber) | New proposal (Brand-matched) |
+|---|---|---|
+| Primary | `#4F46E5` Indigo | `#D0744B` Terracotta |
+| Accent | `#F59E0B` Amber | `#F9AC02` Gold |
+| Dark bg | `hsl(224 71% 4%)` | `#111C30` Midnight Navy |
+| Card (dark) | Dark indigo | `#15465F` Deep Navy |
+| Error | Generic red | `#ED1C24` Brand Red |
+| Info | Generic blue | `#0088CB` Brand Blue |
 
 ---
 
 ## 8. Next Steps (After PR Approval)
 
-1. CTO shares website URL → extract exact brand colors
-2. Adjust primary hue in CSS variables if needed (single-file change)
-3. Apply to `apps/web/src/styles/globals.css`
-4. Install and configure `next-themes` for light/dark mode toggle
-5. Set up shadcn/ui component library with this token set
-6. Abhinav (UI/UX) reviews in Figma before implementation
+1. Apply CSS variables to `apps/web/src/styles/globals.css`
+2. Install `next-themes` for light/dark mode toggle
+3. Set up shadcn/ui component library with this token set
+4. Abhinav (UI/UX) reviews components in Figma before implementation
+5. Implement sidebar with permanent Midnight Navy background
 
 ---
 
-*Proposal by: @nishanth1104 with Claude Sonnet 4.6*
+*Updated by: @nishanth1104 with Claude Sonnet 4.6*
 *Date: March 2026*
-*Pending: Website reference URL from CTO*
+*Source: theanthemacademy.org CSS variable extraction*
