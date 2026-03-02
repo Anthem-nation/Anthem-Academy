@@ -39,6 +39,33 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+        },
+        info: {
+          DEFAULT: 'hsl(var(--info))',
+          foreground: 'hsl(var(--info-foreground))',
+        },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+        },
+        // Raw brand tokens for direct use
+        brand: {
+          terracotta: '#D0744B',
+          navy: '#15465F',
+          midnight: '#111C30',
+          gold: '#F9AC02',
+          red: '#ED1C24',
+          blue: '#0088CB',
+          yellow: '#FFCB05',
+          offwhite: '#F3F1F2',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
