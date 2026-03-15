@@ -25,6 +25,7 @@ export interface Organization {
   slug: string
   logo_url: string | null
   is_active: boolean
+  archived_at: string | null
   created_at: string
   updated_at: string
 }
@@ -87,6 +88,29 @@ export interface Session {
   status: SessionStatus
   created_at: string
   updated_at: string
+}
+
+// ─── Org settings ─────────────────────────────────────────────────────────────
+
+export type EnrollmentFieldType = 'text' | 'number' | 'date' | 'select'
+
+export interface EnrollmentField {
+  name: string
+  type: EnrollmentFieldType
+  required: boolean
+  options?: string[]  // only when type = 'select'
+}
+
+export interface OrgSettings {
+  org_id: string
+  timezone: string
+  enrollment_fields: EnrollmentField[]
+  created_at: string
+  updated_at: string
+}
+
+export interface OrganizationWithSettings extends Organization {
+  org_settings: OrgSettings | null
 }
 
 // ─── Join / view types ────────────────────────────────────────────────────────
