@@ -70,6 +70,11 @@ $$;
 -- Step 5: RLS policies — organizations table (write)
 -- ============================================================
 
+-- Platform admins can see all orgs
+create policy "platform admins can select all organizations"
+  on public.organizations for select to authenticated
+  using ((select role from public.persons where id = auth.uid()) = 'admin');
+
 -- Platform admins can insert any org
 create policy "platform admins can insert organizations"
   on public.organizations for insert to authenticated
