@@ -6,21 +6,26 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // We capture the chain so each test can configure the resolved value.
 // ---------------------------------------------------------------------------
 
-const mockData = vi.fn()
+type MockResult = { data: unknown[]; error: null }
 
-// Generic terminal: resolves { data, error }
-const mockResolve = vi.fn()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockData    = vi.fn() as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockResolve = vi.fn() as any
 
 // Chainable builder returned by .select()
-const mockIn = vi.fn(() => mockResolve())
-const mockEq = vi.fn(() => mockResolve())
-const mockSelect = vi.fn(() => ({
-  eq: mockEq,
-  in: mockIn,
+const mockIn  = vi.fn((_col: string, _vals: unknown[]) => mockResolve() as Promise<MockResult>)
+const mockEq  = vi.fn((_col: string, _val:  unknown)   => mockResolve() as Promise<MockResult>)
+const mockSelect = vi.fn((_cols: string) => ({
+  eq:  mockEq,
+  in:  mockIn,
   // allow awaiting .select() directly (no further filter)
-  then: (resolve: (v: unknown) => unknown) => Promise.resolve(mockData()).then(resolve),
+  then: (
+    resolve:  (v: MockResult) => unknown,
+    _reject?: (e: unknown)    => unknown,
+  ) => (Promise.resolve(mockData() as MockResult)).then(resolve),
 }))
-const mockFrom = vi.fn(() => ({ select: mockSelect }))
+const mockFrom = vi.fn((_table: string) => ({ select: mockSelect }))
 
 const mockSupabase = { from: mockFrom }
 
@@ -128,8 +133,9 @@ describe('RLS — persons table', () => {
       .eq('org_id', ORG_A)
 
     expect(data).toHaveLength(3)
-    expect(data!.map((p: typeof STUDENT) => p.id)).toContain(ADMIN_A.id)
-    expect(data!.map((p: typeof STUDENT) => p.id)).toContain(STUDENT.id)
+    const persons = data! as (typeof STUDENT)[]
+    expect(persons.map(p => p.id)).toContain(ADMIN_A.id)
+    expect(persons.map(p => p.id)).toContain(STUDENT.id)
   })
 
   it('admin from Org A querying Org B persons — blocked (0 rows)', async () => {
@@ -173,8 +179,9 @@ describe('RLS — organizations table', () => {
     const { data } = await mockSupabase.from('organizations').select('*')
 
     expect(data).toHaveLength(2)
-    expect(data!.map((o: { id: string }) => o.id)).toContain(ORG_A)
-    expect(data!.map((o: { id: string }) => o.id)).toContain(ORG_B)
+    const orgs = data! as { id: string }[]
+    expect(orgs.map(o => o.id)).toContain(ORG_A)
+    expect(orgs.map(o => o.id)).toContain(ORG_B)
   })
 })
 
@@ -208,7 +215,7 @@ describe('RLS — org_memberships table', () => {
       .eq('org_id', ORG_A)
 
     expect(data).toHaveLength(3)
-    const personIds = data!.map((m: typeof MEMBERSHIP_STUDENT) => m.person_id)
+    const personIds = (data! as (typeof MEMBERSHIP_STUDENT)[]).map(m => m.person_id)
     expect(personIds).toContain(STUDENT.id)
     expect(personIds).toContain(STAFF.id)
     expect(personIds).toContain(ADMIN_A.id)
