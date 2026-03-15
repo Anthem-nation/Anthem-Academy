@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Users, Building2, BookOpen, UserCircle2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 
@@ -144,14 +145,14 @@ export default async function AdminPage() {
           <h2 className="text-lg font-semibold text-foreground">Quick Links</h2>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
-              <a href="/dashboard/admin/orgs" className="text-primary hover:underline">
+              <Link href="/dashboard/admin/orgs" className="text-primary hover:underline">
                 Manage Organizations →
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="/dashboard/admin/users" className="text-primary hover:underline">
+              <Link href="/dashboard/admin/users" className="text-primary hover:underline">
                 Manage Users →
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
