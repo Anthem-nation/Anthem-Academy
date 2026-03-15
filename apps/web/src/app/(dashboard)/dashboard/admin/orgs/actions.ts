@@ -52,20 +52,23 @@ export async function createOrg(formData: FormData): Promise<ApiResponse<{ id: s
   }
 
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('organizations')
-    .insert(parsed.data)
-    .select('id')
-    .single()
+  const { data, error } = await supabase.rpc('admin_create_org', {
+    p_name: parsed.data.name,
+    p_slug: parsed.data.slug,
+    p_is_active: parsed.data.is_active,
+  })
 
   if (error) {
     if (error.code === '23505') {
       return { data: null, error: 'An organization with that slug already exists.' }
     }
+    if (error.code === '42501') {
+      return { data: null, error: 'You do not have permission to create organizations.' }
+    }
     return { data: null, error: error.message }
   }
 
-  redirect(`/dashboard/admin/orgs/${data.id}`)
+  redirect(`/dashboard/admin/orgs/${data}`)
 }
 
 // ─── updateOrg ────────────────────────────────────────────────────────────────
@@ -83,37 +86,36 @@ export async function updateOrg(id: string, formData: FormData): Promise<ApiResp
   }
 
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('organizations')
-    .update(parsed.data)
-    .eq('id', id)
-    .select('id')
-    .single()
+  const { error } = await supabase.rpc('admin_update_org', {
+    p_id: id,
+    p_name: parsed.data.name,
+    p_slug: parsed.data.slug,
+    p_is_active: parsed.data.is_active,
+  })
 
   if (error) {
     if (error.code === '23505') {
       return { data: null, error: 'An organization with that slug already exists.' }
     }
-    if (error.code === 'PGRST116') {
+    if (error.code === '42501') {
       return { data: null, error: 'Organization not found or you do not have permission to update it.' }
     }
     return { data: null, error: error.message }
   }
 
-  redirect(`/dashboard/admin/orgs/${data.id}`)
+  redirect(`/dashboard/admin/orgs/${id}`)
 }
 
 // ─── archiveOrg ───────────────────────────────────────────────────────────────
 
 export async function archiveOrg(id: string): Promise<ApiResponse<null>> {
   const supabase = await createClient()
-  const { error } = await supabase
-    .from('organizations')
-    .update({ archived_at: new Date().toISOString() })
-    .eq('id', id)
-    .is('archived_at', null)  // idempotency guard
+  const { error } = await supabase.rpc('admin_archive_org', { p_id: id })
 
   if (error) {
+    if (error.code === '42501') {
+      return { data: null, error: 'You do not have permission to archive organizations.' }
+    }
     return { data: null, error: error.message }
   }
 
@@ -124,12 +126,12 @@ export async function archiveOrg(id: string): Promise<ApiResponse<null>> {
 
 export async function unarchiveOrg(id: string): Promise<ApiResponse<null>> {
   const supabase = await createClient()
-  const { error } = await supabase
-    .from('organizations')
-    .update({ archived_at: null })
-    .eq('id', id)
+  const { error } = await supabase.rpc('admin_unarchive_org', { p_id: id })
 
   if (error) {
+    if (error.code === '42501') {
+      return { data: null, error: 'You do not have permission to unarchive organizations.' }
+    }
     return { data: null, error: error.message }
   }
 
@@ -158,15 +160,16 @@ export async function updateOrgSettings(orgId: string, formData: FormData): Prom
   }
 
   const supabase = await createClient()
-  const { error } = await supabase
-    .from('org_settings')
-    .update({
-      timezone: parsed.data.timezone,
-      enrollment_fields: parsed.data.enrollment_fields,
-    })
-    .eq('org_id', orgId)
+  const { error } = await supabase.rpc('admin_update_org_settings', {
+    p_org_id: orgId,
+    p_timezone: parsed.data.timezone,
+    p_enrollment_fields: JSON.stringify(parsed.data.enrollment_fields),
+  })
 
   if (error) {
+    if (error.code === '42501') {
+      return { data: null, error: 'You do not have permission to update org settings.' }
+    }
     return { data: null, error: error.message }
   }
 
@@ -208,10 +211,10 @@ export async function uploadOrgLogo(
   const { data: urlData } = supabase.storage.from('org-logos').getPublicUrl(path)
   const logo_url = urlData.publicUrl
 
-  const { error: updateError } = await supabase
-    .from('organizations')
-    .update({ logo_url })
-    .eq('id', orgId)
+  const { error: updateError } = await supabase.rpc('admin_update_org_logo', {
+    p_id: orgId,
+    p_logo_url: logo_url,
+  })
 
   if (updateError) {
     return { data: null, error: updateError.message }
