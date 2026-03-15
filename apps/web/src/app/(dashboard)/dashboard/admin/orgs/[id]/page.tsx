@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { OrgForm } from '../_components/OrgForm'
@@ -40,6 +41,21 @@ export default async function EditOrgPage({ params }: PageProps) {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Edit Organization</h1>
         <p className="mt-1 text-sm text-gray-500">{org.name}</p>
+      </div>
+
+      <div className="flex space-x-1 border-b border-gray-200">
+        <Link
+          href={`/dashboard/admin/orgs/${id}`}
+          className="px-4 py-2 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600"
+        >
+          Settings
+        </Link>
+        <Link
+          href={`/dashboard/admin/orgs/${id}/members`}
+          className="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+        >
+          Members
+        </Link>
       </div>
 
       {org.archived_at && (

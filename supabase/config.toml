@@ -130,6 +130,10 @@ otp_length = 6
 template = "Your code is {{ .Code }}"
 max_frequency = "5s"
 
+[auth.hook.custom_access_token]
+enabled = true
+uri = "pg-functions://postgres/public/custom_access_token_hook"
+
 [auth.external.google]
 enabled = false
 client_id = "env(GOOGLE_CLIENT_ID)"
