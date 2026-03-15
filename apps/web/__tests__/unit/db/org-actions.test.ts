@@ -3,30 +3,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
-// Leaf-level mock functions
-const mockSingle = vi.fn()
-const mockIs = vi.fn(() => ({ single: mockSingle }))
-const mockEq = vi.fn(() => ({ single: mockSingle, is: mockIs }))
-const mockSelect = vi.fn(() => ({ eq: mockEq, single: mockSingle }))
-const mockInsert = vi.fn(() => ({ select: mockSelect }))
-const mockUpdate = vi.fn(() => ({ eq: mockEq, is: mockIs }))
-
-const mockFrom = vi.fn(() => ({
-  insert: mockInsert,
-  update: mockUpdate,
-  select: mockSelect,
-}))
-
-const mockSupabase = { from: mockFrom }
+const mockRpc = vi.fn()
+const mockSupabase = { rpc: mockRpc }
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve(mockSupabase)),
 }))
 
-const mockRedirect = vi.fn()
 vi.mock('next/navigation', () => ({
   redirect: (url: string) => {
-    mockRedirect(url)
     throw new Error(`NEXT_REDIRECT:${url}`)
   },
 }))
@@ -54,15 +39,10 @@ async function captureRedirect(fn: () => Promise<unknown>): Promise<string> {
 // ─── createOrg ────────────────────────────────────────────────────────────────
 
 describe('createOrg', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    // Default chain: insert → select → single
-    mockSelect.mockReturnValue({ eq: mockEq, single: mockSingle })
-    mockInsert.mockReturnValue({ select: mockSelect })
-  })
+  beforeEach(() => vi.clearAllMocks())
 
   it('redirects to org detail page on success', async () => {
-    mockSingle.mockResolvedValue({ data: { id: 'uuid-1' }, error: null })
+    mockRpc.mockResolvedValue({ data: 'uuid-1', error: null })
 
     const fd = new FormData()
     fd.set('name', 'Test Org')
@@ -74,10 +54,7 @@ describe('createOrg', () => {
   })
 
   it('returns error for duplicate slug (23505)', async () => {
-    mockSingle.mockResolvedValue({
-      data: null,
-      error: { code: '23505', message: 'duplicate key value' },
-    })
+    mockRpc.mockResolvedValue({ data: null, error: { code: '23505', message: 'duplicate key value' } })
 
     const fd = new FormData()
     fd.set('name', 'Test Org')
@@ -85,37 +62,29 @@ describe('createOrg', () => {
     fd.set('is_active', 'true')
 
     const result = await createOrg(fd)
-    expect(result).toEqual({
-      data: null,
-      error: 'An organization with that slug already exists.',
-    })
+    expect(result).toEqual({ data: null, error: 'An organization with that slug already exists.' })
   })
 
   it('returns validation error when name is too short', async () => {
     const fd = new FormData()
-    fd.set('name', 'X')   // too short (< 2 chars)
+    fd.set('name', 'X') // too short (< 2 chars)
     fd.set('slug', 'x')
     fd.set('is_active', 'true')
 
     const result = await createOrg(fd)
     expect(result?.data).toBeNull()
     expect(result?.error).toContain('at least 2')
+    expect(mockRpc).not.toHaveBeenCalled()
   })
 })
 
 // ─── updateOrg ────────────────────────────────────────────────────────────────
 
 describe('updateOrg', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    // updateOrg chain: .update().eq().select().single()
-    mockSelect.mockReturnValue({ eq: mockEq, single: mockSingle })
-    mockEq.mockReturnValue({ single: mockSingle, is: mockIs, select: mockSelect })
-    mockUpdate.mockReturnValue({ eq: mockEq })
-  })
+  beforeEach(() => vi.clearAllMocks())
 
   it('redirects to org detail page on success', async () => {
-    mockSingle.mockResolvedValue({ data: { id: 'uuid-1' }, error: null })
+    mockRpc.mockResolvedValue({ data: null, error: null })
 
     const fd = new FormData()
     fd.set('name', 'Updated Org')
@@ -126,11 +95,8 @@ describe('updateOrg', () => {
     expect(url).toBe('/dashboard/admin/orgs/uuid-1')
   })
 
-  it('returns error when RLS blocks update (PGRST116)', async () => {
-    mockSingle.mockResolvedValue({
-      data: null,
-      error: { code: 'PGRST116', message: 'No rows returned' },
-    })
+  it('returns error when permission denied (42501)', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: { code: '42501', message: 'Permission denied' } })
 
     const fd = new FormData()
     fd.set('name', 'Updated Org')
@@ -146,16 +112,10 @@ describe('updateOrg', () => {
 // ─── archiveOrg ───────────────────────────────────────────────────────────────
 
 describe('archiveOrg', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockUpdate.mockReturnValue({ eq: mockEq })
-    mockEq.mockReturnValue({ is: mockIs, single: mockSingle })
-    mockIs.mockReturnValue({ single: mockSingle })
-  })
+  beforeEach(() => vi.clearAllMocks())
 
   it('redirects to /dashboard/admin/orgs on success', async () => {
-    // archiveOrg uses .update().eq().is() — no .single()
-    mockIs.mockResolvedValue({ error: null })
+    mockRpc.mockResolvedValue({ data: null, error: null })
 
     const url = await captureRedirect(() => archiveOrg('uuid-1'))
     expect(url).toBe('/dashboard/admin/orgs')
@@ -165,13 +125,11 @@ describe('archiveOrg', () => {
 // ─── updateOrgSettings ────────────────────────────────────────────────────────
 
 describe('updateOrgSettings', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockUpdate.mockReturnValue({ eq: mockEq })
-    mockEq.mockResolvedValue({ error: null })
-  })
+  beforeEach(() => vi.clearAllMocks())
 
   it('redirects to org detail page on success', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: null })
+
     const fd = new FormData()
     fd.set('timezone', 'America/Chicago')
     fd.set('enrollment_fields', JSON.stringify([{ name: 'Grade', type: 'text', required: true }]))
@@ -188,5 +146,6 @@ describe('updateOrgSettings', () => {
     const result = await updateOrgSettings('org-1', fd)
     expect(result?.data).toBeNull()
     expect(result?.error).toBeTruthy()
+    expect(mockRpc).not.toHaveBeenCalled()
   })
 })
