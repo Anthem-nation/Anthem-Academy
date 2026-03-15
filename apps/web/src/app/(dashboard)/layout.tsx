@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { Sidebar } from '@/components/layout/Sidebar'
+import type { UserRole } from '@/types'
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const supabase = await createClient()
@@ -12,11 +14,18 @@ export default async function DashboardLayout({ children }: { children: ReactNod
     redirect('/login')
   }
 
+  const { data: person } = await supabase
+    .from('persons')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const role = (person?.role ?? 'student') as UserRole
+
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar — populated in issue #2 */}
-      <aside className="w-64 border-r bg-card" />
-      <main className="flex-1 p-8">{children}</main>
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar role={role} email={user.email ?? ''} />
+      <main className="flex-1 overflow-auto bg-background p-8">{children}</main>
     </div>
   )
 }
