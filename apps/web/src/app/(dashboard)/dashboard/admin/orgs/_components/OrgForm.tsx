@@ -252,7 +252,7 @@ export function OrgForm({ org, settings, isPlatformAdmin }: OrgFormProps) {
               <p className="text-sm text-gray-600">This organization is archived.</p>
               <button
                 type="button"
-                onClick={() => startTransition(() => unarchiveOrg(org!.id))}
+                onClick={() => startTransition(() => { void unarchiveOrg(org!.id) })}
                 disabled={isPending}
                 className="inline-flex items-center rounded-md border border-green-300 bg-white px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-50 disabled:opacity-50"
               >
@@ -266,7 +266,7 @@ export function OrgForm({ org, settings, isPlatformAdmin }: OrgFormProps) {
               </p>
               <button
                 type="button"
-                onClick={() => startTransition(() => archiveOrg(org!.id))}
+                onClick={() => startTransition(() => { void archiveOrg(org!.id) })}
                 disabled={isPending}
                 className="inline-flex items-center rounded-md border border-red-300 bg-white px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
               >
