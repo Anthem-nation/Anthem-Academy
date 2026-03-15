@@ -73,13 +73,13 @@ $$;
 -- Platform admins can insert any org
 create policy "platform admins can insert organizations"
   on public.organizations for insert to authenticated
-  with check (public.is_platform_admin());
+  with check ((select role from public.persons where id = auth.uid()) = 'admin');
 
 -- Platform admins can update any org (including archive)
 create policy "platform admins can update organizations"
   on public.organizations for update to authenticated
-  using (public.is_platform_admin())
-  with check (public.is_platform_admin());
+  using ((select role from public.persons where id = auth.uid()) = 'admin')
+  with check ((select role from public.persons where id = auth.uid()) = 'admin');
 
 -- Org admins can update their own org (but cannot archive it)
 create policy "org admins can update their own org"
@@ -107,8 +107,8 @@ create policy "org admins can update their org settings"
 
 create policy "platform admins have full access to org settings"
   on public.org_settings for all to authenticated
-  using (public.is_platform_admin())
-  with check (public.is_platform_admin());
+  using ((select role from public.persons where id = auth.uid()) = 'admin')
+  with check ((select role from public.persons where id = auth.uid()) = 'admin');
 
 -- ============================================================
 -- Step 7: Storage — org-logos bucket + policies
@@ -134,7 +134,7 @@ create policy "platform admins can upload org logos"
   on storage.objects for insert to authenticated
   with check (
     bucket_id = 'org-logos'
-    and public.is_platform_admin()
+    and (select role from public.persons where id = auth.uid()) = 'admin'
   );
 
 -- Org admins can upload logo for their own org (path: {org_id}/{filename})
@@ -150,11 +150,11 @@ create policy "platform admins can update org logos"
   on storage.objects for update to authenticated
   using (
     bucket_id = 'org-logos'
-    and public.is_platform_admin()
+    and (select role from public.persons where id = auth.uid()) = 'admin'
   )
   with check (
     bucket_id = 'org-logos'
-    and public.is_platform_admin()
+    and (select role from public.persons where id = auth.uid()) = 'admin'
   );
 
 -- Org admins can update their own org logo
@@ -174,7 +174,7 @@ create policy "platform admins can delete org logos"
   on storage.objects for delete to authenticated
   using (
     bucket_id = 'org-logos'
-    and public.is_platform_admin()
+    and (select role from public.persons where id = auth.uid()) = 'admin'
   );
 
 -- Org admins can delete their own org logo
