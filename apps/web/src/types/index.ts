@@ -125,6 +125,25 @@ export interface MembershipWithOrg extends OrgMembership {
   organization: Pick<Organization, 'id' | 'name' | 'slug' | 'logo_url'>
 }
 
+export interface RoleChangeLog {
+  id: string
+  org_id: string
+  person_id: string
+  changed_by: string
+  old_role: UserRole | null
+  new_role: UserRole | null
+  changed_at: string
+}
+
+export interface MemberWithPerson extends OrgMembership {
+  person: Pick<AppUser, 'id' | 'email' | 'full_name'>
+}
+
+export interface OrgRoleClaim {
+  org_id: string
+  role: UserRole
+}
+
 // ─── API response wrapper ─────────────────────────────────────────────────────
 
 export interface ApiResponse<T = unknown> {
