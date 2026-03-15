@@ -56,6 +56,12 @@ export default async function EditOrgPage({ params }: PageProps) {
         >
           Members
         </Link>
+        <Link
+          href={`/dashboard/admin/orgs/${id}/programs`}
+          className="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+        >
+          Programs
+        </Link>
       </div>
 
       {org.archived_at && (
