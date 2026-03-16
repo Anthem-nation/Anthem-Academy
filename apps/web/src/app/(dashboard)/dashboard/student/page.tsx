@@ -1,16 +1,13 @@
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 import { BookOpen, CheckSquare, Star, Award } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
 
 const stats = [
   { label: 'Courses Enrolled', value: '3', delta: '+1 this month', icon: BookOpen },
   { label: 'Attendance Rate', value: '92%', delta: '+3% this month', icon: CheckSquare },
   { label: 'Skill Level', value: '2', delta: 'Level 3 in progress', icon: Star },
   { label: 'Credentials', value: '1', delta: 'Earned this term', icon: Award },
-]
-
-const upcomingSessions = [
-  { date: 'Mon Mar 16', course: 'Introduction to Python', location: 'Room 101' },
-  { date: 'Wed Mar 18', course: 'Financial Literacy 101', location: 'Room 204' },
-  { date: 'Fri Mar 20', course: 'Leadership Seminar', location: 'Main Hall' },
 ]
 
 const recentActivity = [
@@ -21,7 +18,50 @@ const recentActivity = [
   { action: 'Course enrolled', detail: 'Leadership Seminar', time: '1w ago' },
 ]
 
-export default function StudentPage() {
+export default async function StudentPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  // enrolled cohort IDs
+  const { data: enrollments } = await supabase
+    .from('enrollments')
+    .select('cohort_id')
+    .eq('person_id', user.id)
+    .eq('status', 'active')
+
+  const cohortIds = (enrollments ?? []).map((e: { cohort_id: string }) => e.cohort_id)
+
+  // next 5 upcoming sessions
+  let upcomingSessions: {
+    id: string
+    title: string
+    starts_at: string
+    location: string | null
+    cohort_name: string
+  }[] = []
+
+  if (cohortIds.length > 0) {
+    const { data } = await supabase
+      .from('sessions')
+      .select('id, title, starts_at, location, cohorts(name)')
+      .in('cohort_id', cohortIds)
+      .gte('starts_at', new Date().toISOString())
+      .in('status', ['scheduled', 'in_progress'])
+      .order('starts_at')
+      .limit(5)
+
+    upcomingSessions = (data ?? []).map((s) => ({
+      id: s.id as string,
+      title: s.title as string,
+      starts_at: s.starts_at as string,
+      location: (s.location ?? null) as string | null,
+      cohort_name: (Array.isArray(s.cohorts) ? s.cohorts[0]?.name : (s.cohorts as { name: string } | null)?.name) ?? '',
+    }))
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -60,19 +100,37 @@ export default function StudentPage() {
           style={{ animationDelay: '375ms' }}
         >
           <h2 className="text-lg font-semibold text-foreground">Upcoming Sessions</h2>
-          <ul className="mt-4 divide-y divide-border">
-            {upcomingSessions.map((session) => (
-              <li key={session.date} className="flex items-start justify-between py-3">
-                <div>
-                  <p className="text-sm font-medium text-foreground">{session.course}</p>
-                  <p className="text-xs text-muted-foreground">{session.location}</p>
-                </div>
-                <span className="ml-4 flex-shrink-0 text-xs text-muted-foreground">
-                  {session.date}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {upcomingSessions.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">No upcoming sessions.</p>
+          ) : (
+            <ul className="mt-4 divide-y divide-border">
+              {upcomingSessions.map(session => (
+                <li key={session.id} className="flex items-start justify-between py-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{session.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {session.location ?? session.cohort_name}
+                    </p>
+                  </div>
+                  <span className="ml-4 flex-shrink-0 text-xs text-muted-foreground">
+                    {new Date(session.starts_at).toLocaleDateString('en-US', {
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="mt-4 text-right">
+            <Link
+              href="/dashboard/student/schedule"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              View Full Schedule →
+            </Link>
+          </div>
         </div>
 
         {/* Recent activity */}

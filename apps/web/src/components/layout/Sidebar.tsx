@@ -40,6 +40,7 @@ function getNavItems(role: UserRole): NavItem[] {
   const roleItems: Record<UserRole, NavItem[]> = {
     student: [
       base,
+      { label: 'Schedule', href: '/dashboard/student/schedule', icon: Calendar },
       { label: 'Courses', href: '/dashboard/student/courses', icon: BookOpen },
       { label: 'Attendance', href: '/dashboard/student/attendance', icon: CheckSquare },
       { label: 'Skill Passport', href: '/dashboard/student/skills', icon: Star },
