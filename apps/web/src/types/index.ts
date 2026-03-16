@@ -113,6 +113,20 @@ export interface OrganizationWithSettings extends Organization {
   org_settings: OrgSettings | null
 }
 
+export type EnrollmentStatus = 'pending' | 'active' | 'dropped' | 'completed'
+
+export interface Enrollment {
+  id: string
+  cohort_id: string
+  org_id: string
+  person_id: string
+  enrollment_data: Record<string, unknown>
+  status: EnrollmentStatus
+  enrolled_at: string
+  created_at: string
+  updated_at: string
+}
+
 // ─── Join / view types ────────────────────────────────────────────────────────
 
 export interface SessionWithContext extends Session {
