@@ -28,7 +28,7 @@ export default async function EnrollSuccessPage({
             </svg>
           </div>
         </div>
-        <h1 className="mb-3 text-2xl font-bold text-foreground">You're enrolled!</h1>
+        <h1 className="mb-3 text-2xl font-bold text-foreground">You&apos;re enrolled!</h1>
         <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
           Check your email to confirm your account — your enrollment is pending until confirmed.
         </p>
