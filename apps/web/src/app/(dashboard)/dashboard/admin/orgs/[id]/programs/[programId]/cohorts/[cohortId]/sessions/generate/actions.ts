@@ -26,7 +26,7 @@ export async function generateSessions(
   if (!parsed.success) return { data: null, error: 'Invalid session data.' }
 
   const supabase = await createClient()
-  const { data, error } = await supabase.rpc('admin_generate_sessions', {
+  const { error } = await supabase.rpc('admin_generate_sessions', {
     p_cohort_id:  cohortId,
     p_program_id: programId,
     p_org_id:     orgId,
