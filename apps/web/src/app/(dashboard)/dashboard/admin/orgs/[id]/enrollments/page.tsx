@@ -1,16 +1,14 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { MemberRoleSelect } from './_components/MemberRoleSelect'
-import { AddMemberForm } from './_components/AddMemberForm'
-import { removeMember } from './actions'
-import type { MemberWithPerson, UserRole } from '@/types'
+import { getOrgPendingEnrollments } from '@/lib/queries/enrollments'
+import { AssignCohortForm } from './_components/AssignCohortForm'
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
-export default async function OrgMembersPage({ params }: PageProps) {
+export default async function OrgEnrollmentsPage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
 
@@ -19,7 +17,7 @@ export default async function OrgMembersPage({ params }: PageProps) {
 
   const { data: org, error: orgError } = await supabase
     .from('organizations')
-    .select('id, name, slug')
+    .select('id, name')
     .eq('id', id)
     .single()
 
@@ -27,21 +25,24 @@ export default async function OrgMembersPage({ params }: PageProps) {
     redirect('/dashboard/admin/orgs')
   }
 
-  const { data: members } = await supabase
-    .from('org_memberships')
-    .select('*, person:persons(id, email, full_name)')
+  const { data: enrollments } = await getOrgPendingEnrollments(supabase, id)
+
+  const { data: cohorts } = await supabase
+    .from('cohorts')
+    .select('id, name, program_id, capacity')
     .eq('org_id', id)
-    .order('joined_at')
+    .in('status', ['upcoming', 'active'])
+    .order('name')
 
-  const typedMembers = (members ?? []) as MemberWithPerson[]
-
-  async function handleRemove(membershipId: string) {
-    'use server'
-    await removeMember(membershipId, id)
-  }
+  const openCohorts = (cohorts ?? []) as {
+    id: string
+    name: string
+    program_id: string
+    capacity: number | null
+  }[]
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Edit Organization</h1>
         <p className="mt-1 text-sm text-gray-500">{org.name}</p>
@@ -57,7 +58,7 @@ export default async function OrgMembersPage({ params }: PageProps) {
         </Link>
         <Link
           href={`/dashboard/admin/orgs/${id}/members`}
-          className="px-4 py-2 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600"
+          className="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
         >
           Members
         </Link>
@@ -75,76 +76,77 @@ export default async function OrgMembersPage({ params }: PageProps) {
         </Link>
         <Link
           href={`/dashboard/admin/orgs/${id}/enrollments`}
-          className="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+          className="px-4 py-2 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600"
         >
           Enrollments
         </Link>
       </div>
 
-      {/* Add member form */}
-      <AddMemberForm orgId={id} />
-
-      {/* Member table */}
+      {/* Pending enrollments table */}
       <div className="overflow-hidden border border-gray-200 rounded-lg">
-        {typedMembers.length === 0 ? (
+        {!enrollments || enrollments.length === 0 ? (
           <div className="px-6 py-8 text-center text-sm text-gray-500">
-            No members yet. Add the first member above.
+            No pending enrollments.
           </div>
         ) : (
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Member
+                  Student Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
+                  Program
                 </th>
-                <th className="px-6 py-3" />
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Current Cohort
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Enrolled
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {typedMembers.map((m) => {
-                const initials = (m.person.full_name ?? m.person.email)
-                  .split(' ')
-                  .slice(0, 2)
-                  .map((s: string) => s[0]?.toUpperCase() ?? '')
-                  .join('')
+              {enrollments.map((enrollment) => {
+                const programCohorts = openCohorts.filter(
+                  (c) => c.program_id === enrollment.cohort.program_id,
+                )
+                const enrolledDate = new Date(enrollment.enrolled_at).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                })
 
                 return (
-                  <tr key={m.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-medium text-indigo-700">
-                          {initials}
-                        </div>
-                        <span className="text-sm font-medium text-gray-900">
-                          {m.person.full_name ?? '—'}
-                        </span>
-                      </div>
+                  <tr key={enrollment.id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {enrollment.person.full_name ?? '—'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {m.person.email}
+                      {enrollment.person.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {enrollment.cohort.program.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      {enrollment.cohort.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {enrolledDate}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <MemberRoleSelect
-                        membershipId={m.id}
+                      <AssignCohortForm
+                        enrollmentId={enrollment.id}
                         orgId={id}
-                        currentRole={m.role as UserRole}
+                        currentCohortId={enrollment.cohort_id}
+                        cohorts={programCohorts}
                       />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <form action={handleRemove.bind(null, m.id)}>
-                        <button
-                          type="submit"
-                          className="text-sm text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
-                      </form>
                     </td>
                   </tr>
                 )
