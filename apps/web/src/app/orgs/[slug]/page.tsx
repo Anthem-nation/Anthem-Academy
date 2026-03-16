@@ -124,7 +124,7 @@ function ProgramCard({
         )}
 
         <Link
-          href={`/signup?program=${program.id}&org=${orgSlug}`}
+          href={`/orgs/${orgSlug}/enroll?program=${program.id}`}
           className="block w-full rounded-md bg-primary px-4 py-2 text-center text-sm font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
         >
           Enroll Now
